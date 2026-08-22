@@ -11,7 +11,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
 .login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#450a0a,#b91c1c)}
 .loginbox{background:#fff;border-radius:24px;padding:28px;width:min(430px,100%);box-shadow:0 25px 70px #0004}.brand{text-align:center}.logo{width:76px;height:76px;border-radius:20px;object-fit:cover;background:#fee2e2;margin:auto;display:block}.brand h1{margin:14px 0 4px}.brand p{color:var(--muted);margin:0 0 20px}
 .field{margin:12px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:#fff}
-.btn{border:0;border-radius:12px;padding:11px 15px;font-weight:700}.primary{background:var(--red);color:white}.secondary{background:#f1f5f9;color:var(--text)}.danger{background:#fee2e2;color:#991b1b}.full{width:100%}
+.btn{border:0;border-radius:12px;padding:11px 15px;font-weight:700}.primary{background:var(--red);color:white}.success{background:#15803d;color:white}.secondary{background:#f1f5f9;color:var(--text)}.danger{background:#fee2e2;color:#991b1b}.full{width:100%}
 .app{min-height:100vh}.top{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:5}.topbrand{display:flex;gap:10px;align-items:center;font-weight:800}.mini{width:40px;height:40px;border-radius:12px;object-fit:cover}.layout{display:flex}.side{width:235px;background:#111827;color:#e5e7eb;min-height:calc(100vh - 68px);padding:14px;position:fixed;left:0;top:68px}.nav button{display:block;width:100%;text-align:left;background:transparent;color:#d1d5db;border:0;padding:12px;border-radius:10px;margin:3px 0}.nav button.active,.nav button:hover{background:#7f1d1d;color:#fff}.main{margin-left:235px;padding:22px;width:calc(100% - 235px)}.pagehead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}.pagehead h2{margin:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px}.stat{font-size:28px;font-weight:800;margin-top:8px}.muted{color:var(--muted);font-size:13px}.tablewrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px}.table{width:100%;border-collapse:collapse;min-width:650px}.table th,.table td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}.table th{background:#f8fafc}.pill{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:700}.hadir{background:#dcfce7;color:#166534}.izin{background:#dbeafe;color:#1d4ed8}.sakit{background:#fef3c7;color:#92400e}.alpa{background:#fee2e2;color:#991b1b}.actions{display:flex;gap:8px;flex-wrap:wrap}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.modal{position:fixed;inset:0;background:#0008;display:grid;place-items:center;padding:18px;z-index:20}.modalbox{background:#fff;border-radius:18px;width:min(620px,100%);max-height:90vh;overflow:auto;padding:20px}.modalhead{display:flex;justify-content:space-between;align-items:center}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:12px 16px;border-radius:12px;z-index:50}.login-msg{min-height:20px;margin:8px 0 4px;line-height:1.4}.login-msg.error{color:#b91c1c;font-weight:700}.login-msg.ok{color:#15803d;font-weight:700}.btn:disabled{opacity:.65;cursor:not-allowed}
 @media(max-width:800px){.grid2{grid-template-columns:1fr}.side{width:100%;height:auto;min-height:0;position:fixed;top:auto;bottom:0;left:0;z-index:10;padding:6px}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap;text-align:center;font-size:11px;padding:9px}.main{margin-left:0;width:100%;padding:15px;padding-bottom:82px}.grid{grid-template-columns:repeat(2,1fr)}.top{padding:0 12px}.hide-mobile{display:none}.pagehead{align-items:flex-start;flex-direction:column}.table{min-width:600px}}
 
@@ -239,25 +239,70 @@ function leave(){$("content").innerHTML=`<div class="pagehead"><h2>Izin / Sakit<
 window.addLeave=()=>modal("Izin / Sakit",`<div class="field"><label>Tanggal</label><input id="lDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Siswa</label><select id="lStudent">${state.students.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></div><div class="field"><label>Status</label><select id="lStatus"><option>Izin</option><option>Sakit</option></select></div><div class="field"><label>Keterangan</label><textarea id="lNote"></textarea></div><button class="btn primary full" onclick="window.saveLeave()">Simpan</button>`);
 window.saveLeave=async()=>{const s=state.students.find(x=>x.id==$("lStudent").value);if(!s)return;await add("leave",{date:$("lDate").value,studentName:s.name,studentId:s.id,status:$("lStatus").value,note:$("lNote").value});$("modal").classList.add("hidden")}
  function buildReportRows(){
-   return state.students.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(s=>{
-     const a=state.attendance.filter(x=>x.studentId===s.id);const H=a.filter(x=>x.status==="Hadir").length,I=a.filter(x=>x.status==="Izin").length,S=a.filter(x=>x.status==="Sakit").length,A=a.filter(x=>x.status==="Alfa").length,total=H+I+S+A,score=total?Math.round(H/total*100):0;return {...s,H,I,S,A,total,score}
+   return state.students.slice().sort((a,b)=>{
+     const rc=classRank(a.className)-classRank(b.className);
+     return rc || String(a.name||"").localeCompare(String(b.name||""),"id",{sensitivity:"base"});
+   }).map(s=>{
+     const a=state.attendance.filter(x=>x.studentId===s.id);
+     const H=a.filter(x=>x.status==="Hadir").length;
+     const I=a.filter(x=>x.status==="Izin").length;
+     const S=a.filter(x=>x.status==="Sakit").length;
+     const A=a.filter(x=>x.status==="Alfa" || x.status==="Alpa").length;
+     const total=H+I+S+A;
+     const score=total?Math.round(H/total*100):0;
+     return {...s,H,I,S,A,total,score}
    });
  }
  function reports(){
    const rows=buildReportRows();
-   $("content").innerHTML=`<div class="pagehead"><div><h2>Rekap & Penilaian</h2><div class="muted">Rekap otomatis berdasarkan data absensi yang tersimpan.</div></div><div class="actions"><button class="btn success" onclick="window.exportExcel()">📊 Export Excel (.xlsx)</button><button class="btn secondary" onclick="window.exportCSV()">Export CSV</button><button class="btn danger" onclick="window.resetAttendanceReport()">🗑️ Reset Rekap Absensi</button></div></div><div class="notice"><b>Reset Rekap Absensi:</b> menghapus seluruh catatan Hadir/Izin/Sakit/Alfa yang tersimpan. Data siswa dan kelas <b>tidak ikut terhapus</b>. Gunakan hanya jika ingin memulai rekap dari awal.</div><div class="card" style="margin-bottom:14px"><b>Nilai kehadiran</b><div class="muted">Nilai = jumlah Hadir ÷ total catatan absensi × 100.</div></div><div class="tablewrap"><table class="table"><thead><tr><th>No</th><th>Nama</th><th>Kelas</th><th>Hadir</th><th>Izin</th><th>Sakit</th><th>Alfa</th><th>Total</th><th>Nilai</th></tr></thead><tbody>${rows.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.name)}</b></td><td>${esc(s.className||"-")}</td><td>${s.H}</td><td>${s.I}</td><td>${s.S}</td><td>${s.A}</td><td>${s.total}</td><td><b>${s.score}</b></td></tr>`).join("")||`<tr><td colspan="9" class="muted">Belum ada data siswa.</td></tr>`}</tbody></table></div>`;
+   let no=0,lastClass="";
+   const body=rows.map(s=>{
+     const cls=s.className||"Belum ada kelas";
+     let group="";
+     if(cls!==lastClass){
+       lastClass=cls;
+       group=`<tr><td colspan="9" style="background:#fee2e2;color:#991b1b;font-weight:800;text-align:left">🏫 KELAS ${esc(cls)}</td></tr>`;
+     }
+     no++;
+     return group+`<tr><td>${no}</td><td><b>${esc(s.name)}</b></td><td>${esc(cls)}</td><td>${s.H}</td><td>${s.I}</td><td>${s.S}</td><td>${s.A}</td><td>${s.total}</td><td><b>${s.score}</b></td></tr>`;
+   }).join("");
+   $("content").innerHTML=`<div class="pagehead"><div><h2>Rekap & Penilaian</h2><div class="muted">Urutan: VII A → VII G → VIII A → VIII G → IX A → IX G. Nama siswa diurutkan A–Z dalam setiap kelas.</div></div><div class="actions"><button class="btn success" onclick="window.exportExcel()">📊 Export Excel (.xlsx)</button><button class="btn secondary" onclick="window.exportCSV()">Export CSV</button><button class="btn danger" onclick="window.resetAttendanceReport()">🗑️ Reset Rekap Absensi</button></div></div><div class="notice"><b>Reset Rekap Absensi:</b> hanya menghapus catatan pada koleksi <b>attendance</b>. Data siswa, kelas, izin/sakit, dan akun login tidak ikut terhapus.</div><div class="card" style="margin-bottom:14px"><b>Nilai kehadiran</b><div class="muted">Nilai = jumlah Hadir ÷ total catatan absensi × 100.</div></div><div class="tablewrap"><table class="table"><thead><tr><th>No</th><th>Nama</th><th>Kelas</th><th>Hadir</th><th>Izin</th><th>Sakit</th><th>Alfa</th><th>Total</th><th>Nilai</th></tr></thead><tbody>${body||`<tr><td colspan="9" class="muted">Belum ada data siswa.</td></tr>`}</tbody></table></div>`;
  }
- window.resetAttendanceReport=async()=>{
+ window.resetAttendanceReport=()=>{
    if(!db){toast("Firebase belum siap. Muat ulang halaman.");return}
    const total=state.attendance.length;
    if(!total){toast("Rekap absensi sudah kosong.");return}
-   const ok=confirm(`PERINGATAN\n\nAnda akan menghapus ${total} catatan absensi (Hadir/Izin/Sakit/Alfa).\n\nData siswa, kelas, dan akun login TIDAK akan dihapus.\n\nLanjutkan?`);
-   if(!ok)return;
-   const typed=prompt("Untuk memastikan, ketik RESET lalu tekan OK.");
-   if(typed!=="RESET"){toast("Reset dibatalkan. Tidak ada data yang dihapus.");return}
+   modal("⚠️ Reset Rekap Absensi",`
+     <div class="notice" style="background:#fff7ed;border-color:#fdba74">
+       <b>Perhatian:</b> tindakan ini akan menghapus <b>${total}</b> catatan absensi
+       (Hadir, Izin, Sakit, Alfa). Data siswa, kelas, dan akun login <b>tidak ikut dihapus</b>.
+     </div>
+     <div class="field">
+       <label>Ketik <b>RESET</b> untuk melanjutkan</label>
+       <input id="resetConfirmText" autocomplete="off" placeholder="Ketik RESET">
+     </div>
+     <div class="actions">
+       <button class="btn secondary" onclick="document.getElementById('modal').classList.add('hidden')">Batal</button>
+       <button class="btn danger" onclick="window.confirmResetAttendance()">🗑️ Hapus Rekap</button>
+     </div>
+   `);
+   setTimeout(()=>$("resetConfirmText")?.focus(),100);
+ };
+
+ window.confirmResetAttendance=async()=>{
+   const typed=($("resetConfirmText")?.value||"").trim().toUpperCase();
+   if(typed!=="RESET"){toast("Ketik RESET dengan benar untuk melanjutkan.");return}
+   if(!db){toast("Firebase belum siap.");return}
+
+   const items=state.attendance.slice();
+   if(!items.length){$("modal").classList.add("hidden");toast("Rekap absensi sudah kosong.");return}
+
+   const btn=[...$("modalBody").querySelectorAll("button")].find(b=>b.textContent.includes("Hapus Rekap"));
+   if(btn){btn.disabled=true;btn.textContent="⏳ Menghapus..."}
+
    try{
      let deleted=0;
-     const items=state.attendance.slice();
+     // Firestore batch maksimal 500 operasi. Gunakan 450 agar ada margin aman.
      for(let i=0;i<items.length;i+=450){
        const batch=writeBatch(db);
        const chunk=items.slice(i,i+450);
@@ -265,21 +310,32 @@ window.saveLeave=async()=>{const s=state.students.find(x=>x.id==$("lStudent").va
        await batch.commit();
        deleted+=chunk.length;
      }
-     toast(`Reset berhasil. ${deleted} catatan absensi telah dihapus.`);
-     if(state.page==="reports")reports();
+
+     $("modal").classList.add("hidden");
+     toast(`✅ Reset berhasil: ${deleted} catatan absensi dihapus.`);
+     // Snapshot Firestore akan memperbarui state. Render ulang setelah sedikit jeda
+     // agar tampilan rekap segera kosong di HP.
+     setTimeout(()=>{state.attendance=[];reports()},500);
    }catch(e){
      console.error("Reset rekap gagal:",e);
-     toast(e?.code==="permission-denied"?"Reset gagal: Firestore Rules menolak penghapusan data.":"Reset gagal: "+(e?.message||"periksa koneksi Firebase."));
+     if(btn){btn.disabled=false;btn.textContent="🗑️ Hapus Rekap"}
+     const msg=e?.code==="permission-denied"
+       ?"Reset gagal: Firestore Rules menolak penghapusan. Pastikan pengguna sudah login."
+       :e?.code==="failed-precondition"
+       ?"Reset gagal: Firestore belum siap atau koneksi bermasalah."
+       :"Reset gagal: "+(e?.message||"periksa koneksi Firebase.");
+     toast(msg);
    }
  };
+
  function csvEscape(v){return `"${String(v??"").replace(/"/g,'""')}"`}
- window.exportCSV=()=>{const rows=buildReportRows();let out="No,Nama,Kelas,Hadir,Izin,Sakit,Alfa,Total,Nilai\n";rows.forEach((s,i)=>out+=[i+1,s.name,s.className||"",s.H,s.I,s.S,s.A,s.total,s.score].map(csvEscape).join(",")+"\n");const b=new Blob(["\ufeff"+out],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="Rekap_Absensi_PMR.csv";a.click();URL.revokeObjectURL(u)};
+ window.exportCSV=()=>{const rows=buildReportRows();let out="No,Nama,Kelas,Hadir,Izin,Sakit,Alfa,Total,Nilai\n";rows.forEach((s,i)=>out+=[i+1,s.name,s.className||"",s.H,s.I,s.S,s.A,s.total,s.score].map(csvEscape).join(",")+"\n");const b=new Blob(["\ufeff"+out],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="Rekap_Absensi_PMR_Urut_Kelas.csv";a.click();URL.revokeObjectURL(u)};
  window.exportExcel=async()=>{
    if(!state.students.length){toast("Belum ada data siswa untuk diekspor");return}
    try{
      const XLSX=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");const rows=buildReportRows();
      const summary=[["LAPORAN REKAP ABSENSI PMR"],["Nama Sekolah",state.settings.school||"PMR Digital"],["Nama Pelatih",state.settings.coach||"-"],["Tahun Pelajaran",state.settings.year||"-"],["Tanggal Ekspor",new Date().toLocaleString("id-ID")],[],["REKAP SISWA"],["No","Nama","Kelas","Hadir","Izin","Sakit","Alfa","Total Absensi","Nilai"],...rows.map((s,i)=>[i+1,s.name,s.className||"",s.H,s.I,s.S,s.A,s.total,s.score])];
-     const details=[["DETAIL ABSENSI PMR"],["Nama Sekolah",state.settings.school||"PMR Digital"],["Tahun Pelajaran",state.settings.year||"-"],[],["No","Tanggal","Nama Siswa","Kelas","Status"],...state.attendance.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.studentName||"").localeCompare(b.studentName||"")).map((a,i)=>[i+1,a.date||"",a.studentName||"",a.className||"",a.status||""])];
+     const details=[["DETAIL ABSENSI PMR"],["Nama Sekolah",state.settings.school||"PMR Digital"],["Tahun Pelajaran",state.settings.year||"-"],[],["No","Tanggal","Nama Siswa","Kelas","Status"],...state.attendance.slice().sort((a,b)=>classRank(a.className)-classRank(b.className)||(a.date||"").localeCompare(b.date||"")||(a.studentName||"").localeCompare(b.studentName||"","id",{sensitivity:"base"})).map((a,i)=>[i+1,a.date||"",a.studentName||"",a.className||"",a.status||""])];
      const ws1=XLSX.utils.aoa_to_sheet(summary),ws2=XLSX.utils.aoa_to_sheet(details);ws1["!cols"]=[{wch:6},{wch:30},{wch:18},{wch:12},{wch:12},{wch:12},{wch:12},{wch:18},{wch:12}];ws2["!cols"]=[{wch:6},{wch:14},{wch:30},{wch:18},{wch:14}];ws1["!freeze"]="A8";ws2["!freeze"]="A5";ws1["!autofilter"]={ref:`A8:I${8+rows.length}`};ws2["!autofilter"]={ref:`A5:E${5+state.attendance.length}`};
      const title={font:{bold:true,sz:16,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"B91C1C"}},alignment:{horizontal:"center",vertical:"center"}},head={font:{bold:true,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"7F1D1D"}},alignment:{horizontal:"center",vertical:"center"}};
      ws1["A1"].s=title;ws1["A7"].s=title;for(let c=0;c<9;c++)ws1[XLSX.utils.encode_cell({r:7,c})].s=head;ws2["A1"].s=title;for(let c=0;c<5;c++)ws2[XLSX.utils.encode_cell({r:4,c})].s=head;
