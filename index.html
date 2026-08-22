@@ -14,6 +14,18 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
 .btn{border:0;border-radius:12px;padding:11px 15px;font-weight:700}.primary{background:var(--red);color:white}.secondary{background:#f1f5f9;color:var(--text)}.danger{background:#fee2e2;color:#991b1b}.full{width:100%}
 .app{min-height:100vh}.top{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:5}.topbrand{display:flex;gap:10px;align-items:center;font-weight:800}.mini{width:40px;height:40px;border-radius:12px;object-fit:cover}.layout{display:flex}.side{width:235px;background:#111827;color:#e5e7eb;min-height:calc(100vh - 68px);padding:14px;position:fixed;left:0;top:68px}.nav button{display:block;width:100%;text-align:left;background:transparent;color:#d1d5db;border:0;padding:12px;border-radius:10px;margin:3px 0}.nav button.active,.nav button:hover{background:#7f1d1d;color:#fff}.main{margin-left:235px;padding:22px;width:calc(100% - 235px)}.pagehead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}.pagehead h2{margin:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px}.stat{font-size:28px;font-weight:800;margin-top:8px}.muted{color:var(--muted);font-size:13px}.tablewrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px}.table{width:100%;border-collapse:collapse;min-width:650px}.table th,.table td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}.table th{background:#f8fafc}.pill{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:700}.hadir{background:#dcfce7;color:#166534}.izin{background:#dbeafe;color:#1d4ed8}.sakit{background:#fef3c7;color:#92400e}.alpa{background:#fee2e2;color:#991b1b}.actions{display:flex;gap:8px;flex-wrap:wrap}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.modal{position:fixed;inset:0;background:#0008;display:grid;place-items:center;padding:18px;z-index:20}.modalbox{background:#fff;border-radius:18px;width:min(620px,100%);max-height:90vh;overflow:auto;padding:20px}.modalhead{display:flex;justify-content:space-between;align-items:center}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:12px 16px;border-radius:12px;z-index:50}
 @media(max-width:800px){.side{width:100%;height:auto;min-height:0;position:fixed;top:auto;bottom:0;left:0;z-index:10;padding:6px}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap;text-align:center;font-size:11px;padding:9px}.main{margin-left:0;width:100%;padding:15px;padding-bottom:82px}.grid{grid-template-columns:repeat(2,1fr)}.top{padding:0 12px}.hide-mobile{display:none}.pagehead{align-items:flex-start;flex-direction:column}.table{min-width:600px}}
+
+.att-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.att-table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.att-table{width:100%;min-width:650px;border-collapse:collapse}
+.att-table th,.att-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:center}
+.att-table th{background:#f8fafc;font-size:13px}.att-table th:first-child,.att-table td:first-child{text-align:left}
+.att-radio{width:22px;height:22px;accent-color:var(--red);cursor:pointer}
+.att-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.att-summary .card{padding:12px}.att-summary strong{display:block;font-size:22px;margin-top:3px}
+.kpi-h{border-left:5px solid #16a34a}.kpi-i{border-left:5px solid #2563eb}.kpi-s{border-left:5px solid #d97706}.kpi-a{border-left:5px solid #dc2626}
+.notice{padding:12px 14px;border-radius:12px;background:#f8fafc;border:1px dashed #cbd5e1;margin-bottom:14px}
+@media(max-width:800px){.att-table-wrap{overflow-x:auto}.att-summary{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -85,638 +97,100 @@ $("modal").classList.add("hidden");toast("Data siswa diperbarui")
  function classes(){$("content").innerHTML=`<div class="pagehead"><h2>Data Kelas</h2><button class="btn primary" onclick="window.addClass()">+ Tambah Kelas</button></div><div class="grid">${state.classes.map(c=>`<div class="card"><h3>${esc(c.name)}</h3><div class="muted">${state.students.filter(s=>s.className===c.name).length} siswa</div><button class="btn danger" style="margin-top:10px" onclick="window.del('classes','${c.id}')">Hapus</button></div>`).join("")||`<div class="card">Belum ada kelas.</div>`}</div>`}
 window.addClass=()=>modal("Tambah Kelas",`<div class="field"><label>Nama kelas</label><input id="className" placeholder="Contoh: VIII A"></div><button class="btn primary full" onclick="window.saveClass()">Simpan</button>`);
 window.saveClass=async()=>{if(!$("className").value.trim())return;await add("classes",{name:$("className").value.trim()});$("modal").classList.add("hidden")}
-function attendance(){
-  $("content").innerHTML = `
+ function attendance(){
+  $("content").innerHTML=`
     <div class="pagehead">
-      <div>
-        <h2>Absensi Siswa</h2>
-        <div class="muted">Catat dan kelola kehadiran siswa</div>
-      </div>
+      <div><h2>Absensi Siswa</h2><div class="muted">Pilih kelas dan tanggal untuk mengisi atau mengedit absensi.</div></div>
     </div>
-
     <div class="card" style="margin-bottom:16px">
       <div class="grid2">
-
-        <div class="field">
-          <label>Kelas</label>
-          <select id="attendanceClass" onchange="loadAttendanceStudents()">
-            <option value="">Pilih kelas</option>
-            ${state.classes.map(c => `
-              <option value="${esc(c.name)}">${esc(c.name)}</option>
-            `).join("")}
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Tanggal</label>
-          <input
-            id="attendanceDate"
-            type="date"
-            value="${new Date().toISOString().slice(0,10)}"
-            onchange="loadAttendanceStudents()"
-          >
-        </div>
-
+        <div class="field"><label>Kelas</label><select id="attendanceClass" onchange="window.loadAttendanceStudents()"><option value="">Pilih kelas</option>${state.classes.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("")}</select></div>
+        <div class="field"><label>Tanggal</label><input id="attendanceDate" type="date" value="${new Date().toISOString().slice(0,10)}" onchange="window.loadAttendanceStudents()"></div>
       </div>
     </div>
-
-    <div id="attendancePanel">
-      <div class="card">
-        <div class="muted">
-          Pilih kelas terlebih dahulu untuk menampilkan daftar siswa.
-        </div>
-      </div>
-    </div>
-  `;
+    <div id="attendancePanel"><div class="card"><div class="muted">Pilih kelas terlebih dahulu untuk menampilkan daftar siswa.</div></div></div>`;
  }
- 
-window.loadAttendanceStudents = function(){
 
-  const className = $("attendanceClass").value;
-  const date = $("attendanceDate").value;
-
-  if(!className){
-    $("attendancePanel").innerHTML = `
-      <div class="card">
-        <div class="muted">
-          Pilih kelas terlebih dahulu.
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  const students = state.students.filter(
-    s => s.className === className
-  );
-
-  if(!students.length){
-    $("attendancePanel").innerHTML = `
-      <div class="card">
-        <div class="muted">
-          Belum ada siswa di kelas ${esc(className)}.
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  const existing = {};
-
-  state.attendance
-    .filter(a =>
-      a.date === date &&
-      a.className === className
-    )
-    .forEach(a => {
-      existing[a.studentId] = a.status;
-    });
-
-  $("attendancePanel").innerHTML = `
-
-    <div class="card">
-
-      <div style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:10px;
-        margin-bottom:16px;
-        flex-wrap:wrap;
-      ">
-
-        <div>
-          <h3 style="margin:0">
-            Daftar Absensi
-          </h3>
-
-          <div class="muted">
-            ${esc(className)} • ${date}
-          </div>
-        </div>
-
-        <button
-          class="btn primary"
-          onclick="hadirSemua()"
-        >
-          ✅ Hadir Semua
-        </button>
-
-      </div>
-
-      <div style="
-        display:grid;
-        grid-template-columns:
-        minmax(180px,1fr)
-        100px
-        100px
-        100px
-        100px;
-        gap:8px;
-        padding:12px;
-        background:#f5f7fb;
-        border-radius:10px;
-        font-weight:700;
-      ">
-
-        <div>Nama Siswa</div>
-        <div style="text-align:center">Hadir</div>
-        <div style="text-align:center">Izin</div>
-        <div style="text-align:center">Sakit</div>
-        <div style="text-align:center">Alfa</div>
-
-      </div>
-
-      <div id="attendanceRows">
-
-        ${students.map((s,i) => {
-
-          const status = existing[s.id] || "";
-
-          return `
-            <div
-              class="attendance-row"
-              data-student="${esc(s.id)}"
-              style="
-                display:grid;
-                grid-template-columns:
-                minmax(180px,1fr)
-                100px
-                100px
-                100px
-                100px;
-                gap:8px;
-                align-items:center;
-                padding:12px;
-                border-bottom:1px solid #e5e7eb;
-              "
-            >
-
-              <div>
-                <b>${esc(s.name)}</b>
-                <div class="muted">
-                  ${esc(s.nisn || s.nis || "")}
-                </div>
-              </div>
-
-              <label style="text-align:center">
-                <input
-                  type="radio"
-                  name="status_${s.id}"
-                  value="Hadir"
-                  ${status === "Hadir" ? "checked" : ""}
-                  onchange="updateAttendanceStatus('${s.id}','Hadir')"
-                >
-              </label>
-
-              <label style="text-align:center">
-                <input
-                  type="radio"
-                  name="status_${s.id}"
-                  value="Izin"
-                  ${status === "Izin" ? "checked" : ""}
-                  onchange="updateAttendanceStatus('${s.id}','Izin')"
-                >
-              </label>
-
-              <label style="text-align:center">
-                <input
-                  type="radio"
-                  name="status_${s.id}"
-                  value="Sakit"
-                  ${status === "Sakit" ? "checked" : ""}
-                  onchange="updateAttendanceStatus('${s.id}','Sakit')"
-                >
-              </label>
-
-              <label style="text-align:center">
-                <input
-                  type="radio"
-                  name="status_${s.id}"
-                  value="Alfa"
-                  ${status === "Alfa" ? "checked" : ""}
-                  onchange="updateAttendanceStatus('${s.id}','Alfa')"
-                >
-              </label>
-
-            </div>
-          `;
-
-        }).join("")}
-
-      </div>
-
-      <div id="attendanceSummary"
-        style="
-          display:flex;
-          gap:10px;
-          flex-wrap:wrap;
-          margin-top:18px;
-        ">
-      </div>
-
-      <div style="
-        display:flex;
-        justify-content:flex-end;
-        gap:10px;
-        margin-top:18px;
-      ">
-
-        <button
-          class="btn"
-          onclick="loadAttendanceStudents()"
-        >
-          ↻ Muat Ulang
-        </button>
-
-        <button
-          class="btn primary"
-          onclick="saveAttendance()"
-        >
-          💾 Simpan Absensi
-        </button>
-
-      </div>
-
-    </div>
-  `;
-
-  updateAttendanceSummary();
-};
-
- window.updateAttendanceStatus = function(studentId,status){
-
-  if(!window.tempAttendance){
-    window.tempAttendance = {};
-  }
-
-  window.tempAttendance[studentId] = status;
-
-  updateAttendanceSummary();
-};
-window.hadirSemua = function(){
-
-  const className = $("attendanceClass").value;
-
-  if(!className) return;
-
-  const students = state.students.filter(
-    s => s.className === className
-  );
-
-  window.tempAttendance = {};
-
-  students.forEach(s => {
-    window.tempAttendance[s.id] = "Hadir";
-
-    const radio = document.querySelector(
-      `input[name="status_${s.id}"][value="Hadir"]`
-    );
-
-    if(radio){
-      radio.checked = true;
-    }
-  });
-
-  updateAttendanceSummary();
-
-  toast("Semua siswa ditandai Hadir");
-};
- 
-window.updateAttendanceSummary = function(){
-
-  const rows = document.querySelectorAll(".attendance-row");
-
-  let hadir = 0;
-  let izin = 0;
-  let sakit = 0;
-  let alfa = 0;
-
-  rows.forEach(row => {
-
-    const studentId = row.dataset.student;
-
-    const selected = row.querySelector(
-      `input[name="status_${studentId}"]:checked`
-    );
-
-    if(!selected) return;
-
-    if(selected.value === "Hadir") hadir++;
-    if(selected.value === "Izin") izin++;
-    if(selected.value === "Sakit") sakit++;
-    if(selected.value === "Alfa") alfa++;
-
-  });
-
-  const summary = $("attendanceSummary");
-
-  if(!summary) return;
-
-  summary.innerHTML = `
-
-    <div style="
-      padding:10px 16px;
-      border-radius:10px;
-      background:#dcfce7;
-      color:#166534;
-      font-weight:700;
-    ">
-      🟢 Hadir: ${hadir}
-    </div>
-
-    <div style="
-      padding:10px 16px;
-      border-radius:10px;
-      background:#fef3c7;
-      color:#92400e;
-      font-weight:700;
-    ">
-      🟡 Izin: ${izin}
-    </div>
-
-    <div style="
-      padding:10px 16px;
-      border-radius:10px;
-      background:#dbeafe;
-      color:#1e40af;
-      font-weight:700;
-    ">
-      🔵 Sakit: ${sakit}
-    </div>
-
-    <div style="
-      padding:10px 16px;
-      border-radius:10px;
-      background:#fee2e2;
-      color:#991b1b;
-      font-weight:700;
-    ">
-      🔴 Alfa: ${alfa}
-    </div>
-
-  `;
-};
-
-window.saveAttendance = async function(){
-
-  const className = $("attendanceClass").value;
-  const date = $("attendanceDate").value;
-
-  if(!className){
-    toast("Pilih kelas terlebih dahulu");
-    return;
-  }
-
-  if(!date){
-    toast("Pilih tanggal terlebih dahulu");
-    return;
-  }
-
-  const students = state.students.filter(
-    s => s.className === className
-  );
-
-  let count = 0;
-
-  for(const s of students){
-
-    const selected = document.querySelector(
-      `input[name="status_${s.id}"]:checked`
-    );
-
-    if(!selected) continue;
-
-    const status = selected.value;
-
-    /*
-      ID dibuat berdasarkan tanggal + siswa.
-      Jadi ketika disimpan lagi,
-      data lama akan diperbarui,
-      bukan membuat data baru.
-    */
-
-    const attendanceId =
-      `${date}_${s.id}`;
-
-    await setDoc(
-      doc(db,"attendance",attendanceId),
-      {
-        date: date,
-        studentId: s.id,
-        studentName: s.name,
-        className: className,
-        status: status,
-        updatedAt: serverTimestamp()
-      },
-      {
-        merge:true
-      }
-    );
-
-    count++;
-  }
-
-  toast(
-    `Absensi berhasil disimpan (${count} siswa)`
-  );
-
-  loadAttendanceStudents();
-};
- 
-  window.loadAttendanceForm();
-}
-
-
-window.openAttendance = () => {
-
-  $("attDate").value = new Date().toISOString().slice(0,10);
-
-  if($("attClass")){
-    $("attClass").value = "";
-  }
-
-  window.loadAttendanceForm();
-
-};
-
-
-window.loadAttendanceForm = () => {
-
-  const date = $("attDate")?.value;
-  const className = $("attClass")?.value || "";
-
-  if(!date) return;
-
-  let students = [...state.students];
-
-  if(className){
-    students = students.filter(
-      s => s.className === className
-    );
-  }
-
-  students.sort((a,b) =>
-    (a.name || "").localeCompare(b.name || "")
-  );
-
-  const rows = $("attendanceRows");
-
-  if(!rows) return;
-
-  rows.innerHTML = students.map((s,index) => {
-
-    const old = state.attendance.find(a =>
-      a.date === date &&
-      a.studentId === s.id
-    );
-
-    const status = old?.status || "Hadir";
-
-    return `
-      <tr>
-
-        <td>${index + 1}</td>
-
-        <td>
-          <b>${esc(s.name)}</b>
-        </td>
-
-        <td>
-          ${esc(s.className || "-")}
-        </td>
-
-        <td style="text-align:center">
-          <input
-            type="radio"
-            name="status_${s.id}"
-            value="Hadir"
-            ${status === "Hadir" ? "checked" : ""}
-          >
-        </td>
-
-        <td style="text-align:center">
-          <input
-            type="radio"
-            name="status_${s.id}"
-            value="Izin"
-            ${status === "Izin" ? "checked" : ""}
-          >
-        </td>
-
-        <td style="text-align:center">
-          <input
-            type="radio"
-            name="status_${s.id}"
-            value="Sakit"
-            ${status === "Sakit" ? "checked" : ""}
-          >
-        </td>
-
-        <td style="text-align:center">
-          <input
-            type="radio"
-            name="status_${s.id}"
-            value="Alpa"
-            ${status === "Alpa" ? "checked" : ""}
-          >
-        </td>
-
-      </tr>
-    `;
-
-  }).join("") || `
-    <tr>
-      <td colspan="7" class="muted">
-        Belum ada siswa pada kelas ini.
-      </td>
-    </tr>
-  `;
-
-};
-
-
-window.markAllPresent = () => {
-
-  document
-    .querySelectorAll('input[type="radio"][value="Hadir"]')
-    .forEach(radio => {
-      radio.checked = true;
-    });
-
-  toast("Semua siswa ditandai Hadir");
-
-};
-
-
-window.saveAttendanceBatch = async () => {
-
-  const date = $("attDate")?.value;
-
-  if(!date){
-    toast("Tanggal belum dipilih");
-    return;
-  }
-
-  const className = $("attClass")?.value || "";
-
-  let students = [...state.students];
-
-  if(className){
-    students = students.filter(
-      s => s.className === className
-    );
-  }
-
-  if(!students.length){
-    toast("Tidak ada siswa");
-    return;
-  }
-
-  let saved = 0;
-
-  for(const s of students){
-
-    const selected =
-      document.querySelector(
-        `input[name="status_${s.id}"]:checked`
-      );
-
-    if(!selected) continue;
-
-    const status = selected.value;
-
-    const attendanceId =
-      `${date}_${s.id}`;
-
-    await setDoc(
-      doc(db,"attendance",attendanceId),
-      {
-        date: date,
-        studentId: s.id,
-        studentName: s.name,
-        className: s.className || "",
-        status: status,
-        note: "",
-        updatedAt: serverTimestamp()
-      },
-      {
-        merge: true
-      }
-    );
-
-    saved++;
-
-  }
-
-  toast(`${saved} data absensi berhasil disimpan`);
-
-};
+ function existingAttendance(className,date){
+   const out={};
+   state.attendance.filter(a=>a.date===date&&a.className===className).forEach(a=>out[a.studentId]=a.status);
+   return out;
+ }
+
+ window.loadAttendanceStudents=()=>{
+   const className=$("attendanceClass")?.value||"";
+   const date=$("attendanceDate")?.value||"";
+   if(!className){$("attendancePanel").innerHTML=`<div class="card"><div class="muted">Pilih kelas terlebih dahulu.</div></div>`;return;}
+   const students=state.students.filter(s=>s.className===className).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+   if(!students.length){$("attendancePanel").innerHTML=`<div class="card"><div class="muted">Belum ada siswa di kelas ${esc(className)}.</div></div>`;return;}
+   const old=existingAttendance(className,date);
+   const alreadySaved=students.some(s=>old[s.id]);
+   $("attendancePanel").innerHTML=`
+     <div class="card">
+       <div class="att-toolbar">
+         <div><h3 style="margin:0">Daftar Absensi</h3><div class="muted">${esc(className)} • ${esc(date)}${alreadySaved?" • <b>Data tersimpan — mode edit aktif</b>":""}</div></div>
+         <div class="actions"><button class="btn success" onclick="window.hadirSemua()">✅ Hadir Semua</button><button class="btn secondary" onclick="window.clearAttendance()">↺ Kosongkan</button></div>
+       </div>
+       <div class="notice"><b>Petunjuk:</b> pilih satu status untuk setiap siswa. Data yang sudah tersimpan otomatis muncul kembali saat kelas dan tanggal yang sama dipilih, sehingga bisa langsung diedit.</div>
+       <div class="att-table-wrap"><table class="att-table"><thead><tr><th>Nama Siswa</th><th>Hadir</th><th>Izin</th><th>Sakit</th><th>Alfa</th></tr></thead><tbody id="attendanceRows">
+       ${students.map(s=>{const st=old[s.id]||"";return `<tr data-student="${esc(s.id)}"><td><b>${esc(s.name)}</b><div class="muted">${esc(s.nisn||"-")}</div></td>${["Hadir","Izin","Sakit","Alfa"].map(v=>`<td><input class="att-radio" type="radio" name="status_${esc(s.id)}" value="${v}" ${st===v?"checked":""} onchange="window.updateAttendanceSummary()"></td>`).join("")}</tr>`}).join("")}
+       </tbody></table></div>
+       <div id="attendanceSummary" class="att-summary"></div>
+       <div class="actions" style="justify-content:space-between;margin-top:16px"><button class="btn secondary" onclick="window.loadAttendanceStudents()">↻ Muat Ulang</button><button class="btn primary" onclick="window.saveAttendance()">💾 ${alreadySaved?"Simpan Perubahan":"Simpan Absensi"}</button></div>
+     </div>`;
+   window.updateAttendanceSummary();
+ };
+
+ window.hadirSemua=()=>{
+   if(!$("attendanceClass")?.value){toast("Pilih kelas terlebih dahulu");return;}
+   document.querySelectorAll("#attendanceRows input[value='Hadir']").forEach(r=>r.checked=true);
+   window.updateAttendanceSummary();toast("Semua siswa ditandai Hadir");
+ };
+ window.clearAttendance=()=>{document.querySelectorAll("#attendanceRows input[type='radio']").forEach(r=>r.checked=false);window.updateAttendanceSummary();toast("Pilihan absensi dikosongkan")};
+ window.updateAttendanceSummary=()=>{
+   const c={Hadir:0,Izin:0,Sakit:0,Alfa:0};
+   document.querySelectorAll("#attendanceRows tr[data-student]").forEach(row=>{const x=row.querySelector("input[type='radio']:checked");if(x)c[x.value]++});
+   const total=document.querySelectorAll("#attendanceRows tr[data-student]").length;
+   const belum=Math.max(0,total-c.Hadir-c.Izin-c.Sakit-c.Alfa);const el=$("attendanceSummary");if(!el)return;
+   el.innerHTML=`<div class="card kpi-h">🟢 Hadir<strong>${c.Hadir}</strong></div><div class="card kpi-i">🔵 Izin<strong>${c.Izin}</strong></div><div class="card kpi-s">🟡 Sakit<strong>${c.Sakit}</strong></div><div class="card kpi-a">🔴 Alfa<strong>${c.Alfa}</strong></div><div class="muted" style="grid-column:1/-1">Total siswa: ${total} • Belum dipilih: ${belum}</div>`;
+ };
+ window.saveAttendance=async()=>{
+   const className=$("attendanceClass")?.value||"",date=$("attendanceDate")?.value||"";
+   if(!className){toast("Pilih kelas terlebih dahulu");return} if(!date){toast("Pilih tanggal terlebih dahulu");return}
+   const students=state.students.filter(s=>s.className===className);if(!students.length){toast("Tidak ada siswa pada kelas ini");return}
+   const missing=students.filter(s=>!document.querySelector(`input[name="status_${CSS.escape(s.id)}"]:checked`));
+   if(missing.length){toast(`Masih ada ${missing.length} siswa belum dipilih`);return}
+   try{
+     for(const s of students){const selected=document.querySelector(`input[name="status_${CSS.escape(s.id)}"]:checked`);await setDoc(doc(db,"attendance",`${date}_${s.id}`),{date,studentId:s.id,studentName:s.name,className,status:selected.value,updatedAt:serverTimestamp()},{merge:true})}
+     toast(`Absensi berhasil disimpan (${students.length} siswa)`);window.loadAttendanceStudents();
+   }catch(e){console.error(e);toast("Gagal menyimpan absensi")}
+ };
 function leave(){$("content").innerHTML=`<div class="pagehead"><h2>Izin / Sakit</h2><button class="btn primary" onclick="window.addLeave()">+ Tambah</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Tanggal</th><th>Siswa</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>${state.leave.map(a=>`<tr><td>${esc(a.date)}</td><td>${esc(a.studentName)}</td><td>${esc(a.status)}</td><td>${esc(a.note||"-")}</td><td><button class="btn danger" onclick="window.del('leave','${a.id}')">Hapus</button></td></tr>`).join("")||`<tr><td colspan="5" class="muted">Belum ada data.</td></tr>`}</tbody></table></div>`}
 window.addLeave=()=>modal("Izin / Sakit",`<div class="field"><label>Tanggal</label><input id="lDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Siswa</label><select id="lStudent">${state.students.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></div><div class="field"><label>Status</label><select id="lStatus"><option>Izin</option><option>Sakit</option></select></div><div class="field"><label>Keterangan</label><textarea id="lNote"></textarea></div><button class="btn primary full" onclick="window.saveLeave()">Simpan</button>`);
 window.saveLeave=async()=>{const s=state.students.find(x=>x.id==$("lStudent").value);if(!s)return;await add("leave",{date:$("lDate").value,studentName:s.name,studentId:s.id,status:$("lStatus").value,note:$("lNote").value});$("modal").classList.add("hidden")}
-function reports(){const map={};state.students.forEach(s=>map[s.id]={...s,H:0,I:0,S:0,A:0});state.attendance.forEach(a=>{if(map[a.studentId]){const k={Hadir:"H",Izin:"I",Sakit:"S",Alpa:"A"}[a.status];if(k)map[a.studentId][k]++}});$("content").innerHTML=`<div class="pagehead"><h2>Rekap & Penilaian</h2><button class="btn secondary" onclick="window.exportCSV()">Export CSV</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Nama</th><th>Kelas</th><th>H</th><th>I</th><th>S</th><th>A</th><th>Nilai</th></tr></thead><tbody>${Object.values(map).map(s=>{const total=s.H+s.I+s.S+s.A;const score=total?Math.round((s.H/total)*100):0;return`<tr><td>${esc(s.name)}</td><td>${esc(s.className||"-")}</td><td>${s.H}</td><td>${s.I}</td><td>${s.S}</td><td>${s.A}</td><td><b>${score}</b></td></tr>`}).join("")||`<tr><td colspan="7">Belum ada data siswa.</td></tr>`}</tbody></table></div>`}
-window.exportCSV=()=>{let out="Nama,Kelas,Hadir,Izin,Sakit,Alpa,Nilai\\n";state.students.forEach(s=>{let a=state.attendance.filter(x=>x.studentId===s.id),h=a.filter(x=>x.status==="Hadir").length,i=a.filter(x=>x.status==="Izin").length,ss=a.filter(x=>x.status==="Sakit").length,al=a.filter(x=>x.status==="Alpa").length,t=h+i+ss+al;out+=`"${s.name}","${s.className||""}",${h},${i},${ss},${al},${t?Math.round(h/t*100):0}\\n`});const b=new Blob([out],{type:"text/csv"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="rekap-pmr.csv";a.click();URL.revokeObjectURL(u)}
+ function buildReportRows(){
+   return state.students.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(s=>{
+     const a=state.attendance.filter(x=>x.studentId===s.id);const H=a.filter(x=>x.status==="Hadir").length,I=a.filter(x=>x.status==="Izin").length,S=a.filter(x=>x.status==="Sakit").length,A=a.filter(x=>x.status==="Alpa").length,total=H+I+S+A,score=total?Math.round(H/total*100):0;return {...s,H,I,S,A,total,score}
+   });
+ }
+ function reports(){
+   const rows=buildReportRows();
+   $("content").innerHTML=`<div class="pagehead"><div><h2>Rekap & Penilaian</h2><div class="muted">Rekap otomatis berdasarkan data absensi yang tersimpan.</div></div><div class="actions"><button class="btn success" onclick="window.exportExcel()">📊 Export Excel (.xlsx)</button><button class="btn secondary" onclick="window.exportCSV()">Export CSV</button></div></div><div class="card" style="margin-bottom:14px"><b>Nilai kehadiran</b><div class="muted">Nilai = jumlah Hadir ÷ total catatan absensi × 100.</div></div><div class="tablewrap"><table class="table"><thead><tr><th>No</th><th>Nama</th><th>Kelas</th><th>Hadir</th><th>Izin</th><th>Sakit</th><th>Alfa</th><th>Total</th><th>Nilai</th></tr></thead><tbody>${rows.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.name)}</b></td><td>${esc(s.className||"-")}</td><td>${s.H}</td><td>${s.I}</td><td>${s.S}</td><td>${s.A}</td><td>${s.total}</td><td><b>${s.score}</b></td></tr>`).join("")||`<tr><td colspan="9" class="muted">Belum ada data siswa.</td></tr>`}</tbody></table></div>`;
+ }
+ function csvEscape(v){return `"${String(v??"").replace(/"/g,'""')}"`}
+ window.exportCSV=()=>{const rows=buildReportRows();let out="No,Nama,Kelas,Hadir,Izin,Sakit,Alpa,Total,Nilai\n";rows.forEach((s,i)=>out+=[i+1,s.name,s.className||"",s.H,s.I,s.S,s.A,s.total,s.score].map(csvEscape).join(",")+"\n");const b=new Blob(["\ufeff"+out],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="Rekap_Absensi_PMR.csv";a.click();URL.revokeObjectURL(u)};
+ window.exportExcel=async()=>{
+   if(!state.students.length){toast("Belum ada data siswa untuk diekspor");return}
+   try{
+     const XLSX=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");const rows=buildReportRows();
+     const summary=[["LAPORAN REKAP ABSENSI PMR"],["Nama Sekolah",state.settings.school||"PMR Digital"],["Nama Pelatih",state.settings.coach||"-"],["Tahun Pelajaran",state.settings.year||"-"],["Tanggal Ekspor",new Date().toLocaleString("id-ID")],[],["REKAP SISWA"],["No","Nama","Kelas","Hadir","Izin","Sakit","Alfa","Total Absensi","Nilai"],...rows.map((s,i)=>[i+1,s.name,s.className||"",s.H,s.I,s.S,s.A,s.total,s.score])];
+     const details=[["DETAIL ABSENSI PMR"],["Nama Sekolah",state.settings.school||"PMR Digital"],["Tahun Pelajaran",state.settings.year||"-"],[],["No","Tanggal","Nama Siswa","Kelas","Status"],...state.attendance.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.studentName||"").localeCompare(b.studentName||"")).map((a,i)=>[i+1,a.date||"",a.studentName||"",a.className||"",a.status||""])];
+     const ws1=XLSX.utils.aoa_to_sheet(summary),ws2=XLSX.utils.aoa_to_sheet(details);ws1["!cols"]=[{wch:6},{wch:30},{wch:18},{wch:12},{wch:12},{wch:12},{wch:12},{wch:18},{wch:12}];ws2["!cols"]=[{wch:6},{wch:14},{wch:30},{wch:18},{wch:14}];ws1["!freeze"]="A8";ws2["!freeze"]="A5";ws1["!autofilter"]={ref:`A8:I${8+rows.length}`};ws2["!autofilter"]={ref:`A5:E${5+state.attendance.length}`};
+     const title={font:{bold:true,sz:16,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"B91C1C"}},alignment:{horizontal:"center",vertical:"center"}},head={font:{bold:true,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"7F1D1D"}},alignment:{horizontal:"center",vertical:"center"}};
+     ws1["A1"].s=title;ws1["A7"].s=title;for(let c=0;c<9;c++)ws1[XLSX.utils.encode_cell({r:7,c})].s=head;ws2["A1"].s=title;for(let c=0;c<5;c++)ws2[XLSX.utils.encode_cell({r:4,c})].s=head;
+     const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws1,"Rekap Siswa");XLSX.utils.book_append_sheet(wb,ws2,"Detail Absensi");XLSX.writeFile(wb,"Rekap_Absensi_PMR.xlsx");toast("Excel berhasil dibuat dengan format rapi")
+   }catch(e){console.error(e);toast("Export Excel gagal. Periksa koneksi internet.")}
+ };
 function printPage(){$("content").innerHTML=`<div class="pagehead"><h2>Laporan</h2><button class="btn primary" onclick="window.print()">🖨️ Cetak / PDF</button></div><div class="card" id="printArea"><h1>${esc(state.settings.school)}</h1><h2>Laporan Absensi PMR</h2><p>Pelatih: ${esc(state.settings.coach||"-")} • Tahun Ajaran: ${esc(state.settings.year)}</p><hr><p>Total siswa: <b>${state.students.length}</b> • Catatan absensi: <b>${state.attendance.length}</b></p><p>Dicetak: ${new Date().toLocaleString("id-ID")}</p></div>`}
 function settings(){$("content").innerHTML=`<div class="pagehead"><h2>Pengaturan</h2></div><div class="card"><div class="field"><label>Nama Sekolah</label><input id="setSchool" value="${esc(state.settings.school)}"></div><div class="field"><label>Nama Pelatih</label><input id="setCoach" value="${esc(state.settings.coach)}"></div><div class="field"><label>Tahun Ajaran</label><input id="setYear" value="${esc(state.settings.year)}"></div><div class="field"><label>Logo</label><input id="setLogo" type="file" accept="image/*"><div class="muted">Logo disimpan di browser perangkat ini. Untuk logo yang sama di semua HP, gunakan file logo yang sama pada aplikasi.</div></div><button class="btn primary" onclick="window.saveSettings()">Simpan Pengaturan</button></div>`}
 window.saveSettings=()=>{state.settings.school=$("setSchool").value;state.settings.coach=$("setCoach").value;state.settings.year=$("setYear").value;const f=$("setLogo").files[0];if(f){const r=new FileReader();r.onload=()=>{state.settings.logo=r.result;saveLocal();applySettings();toast("Pengaturan tersimpan");render()};r.readAsDataURL(f)}else{saveLocal();applySettings();toast("Pengaturan tersimpan");render()}}
