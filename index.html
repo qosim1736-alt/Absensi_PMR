@@ -129,3 +129,68 @@ window.saveClass=async()=>{if(!$("className").value.trim())return;await add("cla
       </tbody></table></div></section>`).join("")}
       <div id="attendanceSummary" class="att-summary"></div>
       <div class="att-savebar"><div class="muted"><b>Pastikan semua siswa sudah dipilih.</b><br>Data yang tersimpan bisa dibuka kembali untuk diedit.</div><div class="actions"><butt
+    }
+
+    await batch.commit();
+
+    // Refresh local data before re-rendering so edit mode shows the saved values.
+    toast(`✅ ${selected.length} siswa berhasil disimpan`);
+    setTimeout(()=>window.loadAllAttendance(),300);
+
+  }catch(e){
+    console.error("ERROR SIMPAN ABSENSI:",e);
+    let msg=e?.code||e?.message||"unknown-error";
+    if(msg.includes("permission-denied")){
+      msg="permission-denied — akun belum diizinkan Firestore";
+    }else if(msg.includes("failed-precondition")){
+      msg="failed-precondition — periksa koneksi/konfigurasi Firestore";
+    }else if(msg.includes("unavailable")){
+      msg="unavailable — koneksi internet bermasalah";
+    }
+    toast("❌ Gagal menyimpan: "+msg);
+  }finally{
+    if(saveButton){
+      saveButton.disabled=false;
+      saveButton.textContent=originalText||"💾 Simpan Absensi";
+    }
+  }
+};
+
+function leave(){$("content").innerHTML=`<div class="pagehead"><h2>Izin / Sakit</h2><button class="btn primary" onclick="window.addLeave()">+ Tambah</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Tanggal</th><th>Siswa</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>${state.leave.map(a=>`<tr><td>${esc(a.date)}</td><td>${esc(a.studentName)}</td><td>${esc(a.status)}</td><td>${esc(a.note||"-")}</td><td><button class="btn danger" onclick="window.del('leave','${a.id}')">Hapus</button></td></tr>`).join("")||`<tr><td colspan="5" class="muted">Belum ada data.</td></tr>`}</tbody></table></div>`}
+window.addLeave=()=>modal("Izin / Sakit",`<div class="field"><label>Tanggal</label><input id="lDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Siswa</label><select id="lStudent">${state.students.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></div><div class="field"><label>Status</label><select id="lStatus"><option>Izin</option><option>Sakit</option></select></div><div class="field"><label>Keterangan</label><textarea id="lNote"></textarea></div><button class="btn primary full" onclick="window.saveLeave()">Simpan</button>`);
+window.saveLeave=async()=>{const s=state.students.find(x=>x.id==$("lStudent").value);if(!s)return;await add("leave",{date:$("lDate").value,studentName:s.name,studentId:s.id,status:$("lStatus").value,note:$("lNote").value});$("modal").classList.add("hidden")}
+ function buildReportRows(){
+   return state.students.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(s=>{
+     const a=state.attendance.filter(x=>x.studentId===s.id);const H=a.filter(x=>x.status==="Hadir").length,I=a.filter(x=>x.status==="Izin").length,S=a.filter(x=>x.status==="Sakit").length,A=a.filter(x=>x.status==="Alfa"||x.status==="Alpa").length,total=H+I+S+A,score=total?Math.round(H/total*100):0;return {...s,H,I,S,A,total,score}
+   });
+ }
+ function reports(){
+   const rows=buildReportRows();
+   $("content").innerHTML=`<div class="pagehead"><div><h2>Rekap & Penilaian</h2><div class="muted">Rekap otomatis berdasarkan data absensi yang tersimpan.</div></div><div class="actions"><button class="btn success" onclick="window.exportExcel()">📊 Export Excel (.xlsx)</button><button class="btn secondary" onclick="window.exportCSV()">Export CSV</button></div></div><div class="card" style="margin-bottom:14px"><b>Nilai kehadiran</b><div class="muted">Nilai = jumlah Hadir ÷ total catatan absensi × 100.</div></div><div class="tablewrap"><table class="table"><thead><tr><th>No</th><th>Nama</th><th>Kelas</th><th>Hadir</th><th>Izin</th><th>Sakit</th><th>Alfa</th><th>Total</th><th>Nilai</th></tr></thead><tbody>${rows.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.name)}</b></td><td>${esc(s.className||"-")}</td><td>${s.H}</td><td>${s.I}</td><td>${s.S}</td><td>${s.A}</td><td>${s.total}</td><td><b>${s.score}</b></td></tr>`).join("")||`<tr><td colspan="9" class="muted">Belum ada data siswa.</td></tr>`}</tbody></table></div>`;
+ }
+ function csvEscape(v){return `"${String(v??"").replace(/"/g,'""')}"`}
+ window.exportCSV=()=>{const rows=buildReportRows();let out="No,Nama,Kelas,Hadir,Izin,Sakit,Alfa,Total,Nilai\n";rows.forEach((s,i)=>out+=[i+1,s.name,s.className||"",s.H,s.I,s.S,s.A,s.total,s.score].map(csvEscape).join(",")+"\n");const b=new Blob(["\ufeff"+out],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="Rekap_Absensi_PMR.csv";a.click();URL.revokeObjectURL(u)};
+ window.exportExcel=async()=>{
+   if(!state.students.length){toast("Belum ada data siswa untuk diekspor");return}
+   try{
+     const XLSX=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");const rows=buildReportRows();
+     const summary=[["LAPORAN REKAP ABSENSI PMR"],["Nama Sekolah",state.settings.school||"PMR Digital"],["Nama Pelatih",state.settings.coach||"-"],["Tahun Pelajaran",state.settings.year||"-"],["Tanggal Ekspor",new Date().toLocaleString("id-ID")],[],["REKAP SISWA"],["No","Nama","Kelas","Hadir","Izin","Sakit","Alfa","Total Absensi","Nilai"],...rows.map((s,i)=>[i+1,s.name,s.className||"",s.H,s.I,s.S,s.A,s.total,s.score])];
+     const details=[["DETAIL ABSENSI PMR"],["Nama Sekolah",state.settings.school||"PMR Digital"],["Tahun Pelajaran",state.settings.year||"-"],[],["No","Tanggal","Nama Siswa","Kelas","Status"],...state.attendance.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.studentName||"").localeCompare(b.studentName||"")).map((a,i)=>[i+1,a.date||"",a.studentName||"",a.className||"",a.status||""])];
+     const ws1=XLSX.utils.aoa_to_sheet(summary),ws2=XLSX.utils.aoa_to_sheet(details);ws1["!cols"]=[{wch:6},{wch:30},{wch:18},{wch:12},{wch:12},{wch:12},{wch:12},{wch:18},{wch:12}];ws2["!cols"]=[{wch:6},{wch:14},{wch:30},{wch:18},{wch:14}];ws1["!freeze"]="A8";ws2["!freeze"]="A5";ws1["!autofilter"]={ref:`A8:I${8+rows.length}`};ws2["!autofilter"]={ref:`A5:E${5+state.attendance.length}`};
+     const title={font:{bold:true,sz:16,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"B91C1C"}},alignment:{horizontal:"center",vertical:"center"}},head={font:{bold:true,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"7F1D1D"}},alignment:{horizontal:"center",vertical:"center"}};
+     ws1["A1"].s=title;ws1["A7"].s=title;for(let c=0;c<9;c++)ws1[XLSX.utils.encode_cell({r:7,c})].s=head;ws2["A1"].s=title;for(let c=0;c<5;c++)ws2[XLSX.utils.encode_cell({r:4,c})].s=head;
+     const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws1,"Rekap Siswa");XLSX.utils.book_append_sheet(wb,ws2,"Detail Absensi");XLSX.writeFile(wb,"Rekap_Absensi_PMR.xlsx");toast("Excel berhasil dibuat dengan format rapi")
+   }catch(e){console.error(e);toast("Export Excel gagal. Periksa koneksi internet.")}
+ };
+function printPage(){$("content").innerHTML=`<div class="pagehead"><h2>Laporan</h2><button class="btn primary" onclick="window.print()">🖨️ Cetak / PDF</button></div><div class="card" id="printArea"><h1>${esc(state.settings.school)}</h1><h2>Laporan Absensi PMR</h2><p>Pelatih: ${esc(state.settings.coach||"-")} • Tahun Ajaran: ${esc(state.settings.year)}</p><hr><p>Total siswa: <b>${state.students.length}</b> • Catatan absensi: <b>${state.attendance.length}</b></p><p>Dicetak: ${new Date().toLocaleString("id-ID")}</p></div>`}
+function settings(){$("content").innerHTML=`<div class="pagehead"><h2>Pengaturan</h2></div><div class="card"><div class="field"><label>Nama Sekolah</label><input id="setSchool" value="${esc(state.settings.school)}"></div><div class="field"><label>Nama Pelatih</label><input id="setCoach" value="${esc(state.settings.coach)}"></div><div class="field"><label>Tahun Ajaran</label><input id="setYear" value="${esc(state.settings.year)}"></div><div class="field"><label>Logo</label><input id="setLogo" type="file" accept="image/*"><div class="muted">Logo disimpan di browser perangkat ini. Untuk logo yang sama di semua HP, gunakan file logo yang sama pada aplikasi.</div></div><button class="btn primary" onclick="window.saveSettings()">Simpan Pengaturan</button></div>`}
+window.saveSettings=()=>{state.settings.school=$("setSchool").value;state.settings.coach=$("setCoach").value;state.settings.year=$("setYear").value;const f=$("setLogo").files[0];if(f){const r=new FileReader();r.onload=()=>{state.settings.logo=r.result;saveLocal();applySettings();toast("Pengaturan tersimpan");render()};r.readAsDataURL(f)}else{saveLocal();applySettings();toast("Pengaturan tersimpan");render()}}
+window.del=remove;
+$("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-page]");if(!b)return;state.page=b.dataset.page;document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x===b));render()});
+$("logout").onclick=()=>signOut(auth);
+$("loginBtn").onclick=async()=>{if(!configReady){$("loginMsg").textContent="Konfigurasi belum lengkap: isi apiKey pada index.html sesuai Firebase Console.";return}try{await signInWithEmailAndPassword(auth,$("email").value,$("password").value)}catch(e){$("loginMsg").textContent=e.message}}
+loadLocal();
+onAuthStateChanged(auth,user=>{if(user){$("login").classList.add("hidden");$("app").classList.remove("hidden");$("userEmail").textContent=user.email||"";listen();render()}else{$("login").classList.remove("hidden");$("app").classList.add("hidden");}});
+if(!configReady)$("loginMsg").textContent="Sebelum upload, isi apiKey Firebase di bagian firebaseConfig.";
+</script>
+</body></html>
