@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PMR Digital — Absensi Online</title>
+<meta name="theme-color" content="#b91c1c">
+<style>
+:root{--red:#b91c1c;--red2:#ef4444;--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#64748b;--line:#e5e7eb;--green:#15803d;--amber:#b45309;--blue:#2563eb}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#450a0a,#b91c1c)}
+.loginbox{background:#fff;border-radius:24px;padding:28px;width:min(430px,100%);box-shadow:0 25px 70px #0004}.brand{text-align:center}.logo{width:76px;height:76px;border-radius:20px;object-fit:cover;background:#fee2e2;margin:auto;display:block}.brand h1{margin:14px 0 4px}.brand p{color:var(--muted);margin:0 0 20px}
+.field{margin:12px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.btn{border:0;border-radius:12px;padding:11px 15px;font-weight:700}.primary{background:var(--red);color:white}.secondary{background:#f1f5f9;color:var(--text)}.danger{background:#fee2e2;color:#991b1b}.full{width:100%}
+.app{min-height:100vh}.top{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:5}.topbrand{display:flex;gap:10px;align-items:center;font-weight:800}.mini{width:40px;height:40px;border-radius:12px;object-fit:cover}.layout{display:flex}.side{width:235px;background:#111827;color:#e5e7eb;min-height:calc(100vh - 68px);padding:14px;position:fixed;left:0;top:68px}.nav button{display:block;width:100%;text-align:left;background:transparent;color:#d1d5db;border:0;padding:12px;border-radius:10px;margin:3px 0}.nav button.active,.nav button:hover{background:#7f1d1d;color:#fff}.main{margin-left:235px;padding:22px;width:calc(100% - 235px)}.pagehead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}.pagehead h2{margin:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px}.stat{font-size:28px;font-weight:800;margin-top:8px}.muted{color:var(--muted);font-size:13px}.tablewrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:16px}.table{width:100%;border-collapse:collapse;min-width:650px}.table th,.table td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}.table th{background:#f8fafc}.pill{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:700}.hadir{background:#dcfce7;color:#166534}.izin{background:#dbeafe;color:#1d4ed8}.sakit{background:#fef3c7;color:#92400e}.alpa{background:#fee2e2;color:#991b1b}.actions{display:flex;gap:8px;flex-wrap:wrap}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.modal{position:fixed;inset:0;background:#0008;display:grid;place-items:center;padding:18px;z-index:20}.modalbox{background:#fff;border-radius:18px;width:min(620px,100%);max-height:90vh;overflow:auto;padding:20px}.modalhead{display:flex;justify-content:space-between;align-items:center}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:12px 16px;border-radius:12px;z-index:50}
+@media(max-width:800px){.side{width:100%;height:auto;min-height:0;position:fixed;top:auto;bottom:0;left:0;z-index:10;padding:6px}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap;text-align:center;font-size:11px;padding:9px}.main{margin-left:0;width:100%;padding:15px;padding-bottom:82px}.grid{grid-template-columns:repeat(2,1fr)}.top{padding:0 12px}.hide-mobile{display:none}.pagehead{align-items:flex-start;flex-direction:column}.table{min-width:600px}}
+
+.att-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.att-table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.att-table{width:100%;min-width:650px;border-collapse:collapse}
+.att-table th,.att-table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:center}
+.att-table th{background:#f8fafc;font-size:13px}.att-table th:first-child,.att-table td:first-child{text-align:left}
+.att-radio{width:22px;height:22px;accent-color:var(--red);cursor:pointer}
+.att-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.att-summary .card{padding:12px}.att-summary strong{display:block;font-size:22px;margin-top:3px}
+.kpi-h{border-left:5px solid #16a34a}.kpi-i{border-left:5px solid #2563eb}.kpi-s{border-left:5px solid #d97706}.kpi-a{border-left:5px solid #dc2626}
+.notice{padding:12px 14px;border-radius:12px;background:#f8fafc;border:1px dashed #cbd5e1;margin-bottom:14px}
+@media(max-width:800px){.att-table-wrap{overflow-x:auto}.att-summary{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+ <div class="loginbox">
+  <div class="brand"><img id="loginLogo" class="logo" alt="Logo"><h1>PMR Digital</h1><p id="loginSchool">Absensi Ekstrakurikuler</p></div>
+  <div id="loginMsg" class="muted"></div>
+  <div class="field"><label>Email</label><input id="email" type="email" placeholder="admin@sekolah.sch.id"></div>
+  <div class="field"><label>Password</label><input id="password" type="password" placeholder="Password"></div>
+  <button id="loginBtn" class="btn primary full">Masuk</button>
+  <p class="muted" style="margin-top:14px">Data tersimpan di Firebase dan dapat digunakan dari perangkat lain setelah login.</p>
+ </div>
+</div>
+<div id="app" class="app hidden">
+ <header class="top"><div class="topbrand"><img id="topLogo" class="mini"><span id="schoolTitle">PMR Digital</span></div><div class="actions"><span id="userEmail" class="muted hide-mobile"></span><button id="logout" class="btn secondary">Keluar</button></div></header>
+ <div class="layout"><aside class="side"><nav class="nav" id="nav">
+  <button data-page="dashboard" class="active">🏠 Dashboard</button><button data-page="students">👥 Siswa</button><button data-page="classes">🏫 Kelas</button><button data-page="attendance">✅ Absensi</button><button data-page="leave">📋 Izin/Sakit</button><button data-page="reports">📊 Rekap & Nilai</button><button data-page="print">🖨️ Laporan</button><button data-page="settings">⚙️ Pengaturan</button>
+ </nav></aside><main class="main"><div id="content"></div></main></div>
+</div>
+<div id="modal" class="modal hidden"><div class="modalbox"><div class="modalhead"><h3 id="modalTitle"></h3><button id="modalClose" class="btn secondary">Tutup</button></div><div id="modalBody"></div></div></div>
+<div id="toast" class="toast hidden"></div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import {getFirestore,collection,addDoc,doc,setDoc,deleteDoc,onSnapshot,query,orderBy,serverTimestamp} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+/* GANTI HANYA apiKey DENGAN NILAI DARI FIREBASE CONSOLE.
+   Nilai lain sudah disesuaikan dengan project pada screenshot Anda. */
+const firebaseConfig={
+ apiKey:"AIzaSyA4NcqKhd439RJUHiCtTMcXCxT21xO7gAw",
+ authDomain:"absesi-pmr-spajaone.firebaseapp.com",
+ projectId:"absesi-pmr-spajaone",
+ storageBucket:"absesi-pmr-spajaone.firebasestorage.app",
+ messagingSenderId:"538954023055",
+ appId:"1:538954023055:web:a29699d9d1b5a3ee0bf0fa"
+};
+const configReady=!firebaseConfig.apiKey.startsWith("PASTE_");
+const appFB=initializeApp(firebaseConfig),auth=getAuth(appFB),db=getFirestore(appFB);
+const $=id=>document.getElementById(id); let state={page:"dashboard",students:[],classes:[],attendance:[],leave:[],settings:{school:"PMR Digital",coach:"",year:"2026/2027",logo:""}},unsubs=[];
+function toast(s){$("toast").textContent=s;$("toast").classList.remove("hidden");setTimeout(()=>$("toast").classList.add("hidden"),2500)}
+function saveLocal(){localStorage.setItem("pmr_settings",JSON.stringify(state.settings))}
+function loadLocal(){try{state.settings={...state.settings,...JSON.parse(localStorage.getItem("pmr_settings")||"{}")}}catch{};applySettings()}
+function applySettings(){const s=state.settings;$("schoolTitle").textContent=s.school||"PMR Digital";$("loginSchool").textContent=s.school||"Absensi Ekstrakurikuler";["loginLogo","topLogo"].forEach(id=>$(id).src=s.logo||"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' rx='20' fill='%23fee2e2'/%3E%3Ctext x='50' y='62' text-anchor='middle' font-size='42'%3E♥%3C/text%3E%3C/svg%3E")}
+function esc(x=""){return String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function modal(title,body){$("modalTitle").textContent=title;$("modalBody").innerHTML=body;$("modal").classList.remove("hidden")}
+$("modalClose").onclick=()=>$("modal").classList.add("hidden");
+async function add(col,data){await addDoc(collection(db,col),{...data,createdAt:serverTimestamp()});toast("Data tersimpan")}
+async function remove(col,id){if(confirm("Hapus data ini?")){await deleteDoc(doc(db,col,id));toast("Data dihapus")}}
+function listen(){unsubs.forEach(x=>x());unsubs=[];
+ [["students","students"],["classes","classes"],["attendance","attendance"],["leave","leave"]].forEach(([col,key])=>{
+  unsubs.push(onSnapshot(collection(db,col),snap=>{state[key]=snap.docs.map(d=>({id:d.id,...d.data()}));render()}))
+ })}
+function render(){if($("app").classList.contains("hidden"))return; const p=state.page;
+ if(p==="dashboard")dashboard(); if(p==="students")students();if(p==="classes")classes();if(p==="attendance")attendance();if(p==="leave")leave();if(p==="reports")reports();if(p==="print")printPage();if(p==="settings")settings()}
+function dashboard(){$("content").innerHTML=`<div class="pagehead"><div><h2>Dashboard</h2><div class="muted">${esc(state.settings.school)} • Pelatih: ${esc(state.settings.coach||"-")} • TA ${esc(state.settings.year)}</div></div></div><div class="grid"><div class="card">👥<div class="muted">Total Siswa</div><div class="stat">${state.students.length}</div></div><div class="card">🏫<div class="muted">Kelas</div><div class="stat">${state.classes.length}</div></div><div class="card">📅<div class="muted">Catatan Absensi</div><div class="stat">${state.attendance.length}</div></div><div class="card">📋<div class="muted">Izin/Sakit</div><div class="stat">${state.leave.length}</div></div></div><div class="card" style="margin-top:14px"><h3>Selamat datang</h3><p class="muted">Gunakan menu di bawah. Semua data utama tersimpan di Cloud Firestore.</p></div>`}
+function students(){$("content").innerHTML=`<div class="pagehead"><h2>Data Siswa</h2><button class="btn primary" onclick="window.addStudent()">+ Tambah Siswa</button></div><div class="toolbar"><input id="searchS" class="field" style="margin:0;max-width:350px" placeholder="Cari nama/NISN..." oninput="window.studentsTable()"></div><div class="tablewrap"><table class="table"><thead><tr><th>Nama</th><th>NISN/NIS</th><th>Kelas</th><th>JK</th><th>Aksi</th></tr></thead><tbody id="studentRows"></tbody></table></div>`;studentsTable()}
+window.window.studentsTable=()=>{const q=($("searchS")?.value||"").toLowerCase();$("studentRows").innerHTML=state.students.filter(s=>(s.name+" "+(s.nisn||"")).toLowerCase().includes(q)).map(s=>`<tr><td><b>${esc(s.name)}</b></td><td>${esc(s.nisn||"-")}</td><td>${esc(s.className||"-")}</td><td>${esc(s.gender||"-")}</td><td><div class="actions"><button class="btn secondary" onclick="window.editStudent('${s.id}')">✏️ Edit</button><button class="btn danger" onclick="window.del('students','${s.id}')">Hapus</button></div></td></tr>`).join("")||`<tr><td colspan="5" class="muted">Belum ada siswa.</td></tr>`}
+window.addStudent=()=>modal("Tambah Siswa",`<div class="field"><label>Nama lengkap</label><input id="fName"></div><div class="field"><label>NIS/NISN</label><input id="fNisn"></div><div class="field"><label>Kelas</label><select id="fClass"><option value="">Pilih</option>${state.classes.map(c=>`<option>${esc(c.name)}</option>`).join("")}</select></div><div class="field"><label>Jenis Kelamin</label><select id="fGender"><option>L</option><option>P</option></select></div><button class="btn primary full" onclick="window.saveStudent()">Simpan</button>`);
+window.saveStudent=async()=>{await add("students",{name:$("fName").value.trim(),nisn:$("fNisn").value.trim(),className:$("fClass").value,gender:$("fGender").value});$("modal").classList.add("hidden")}
+window.editStudent=(id)=>{
+const s=state.students.find(x=>x.id===id);if(!s)return;
+modal("Edit Siswa",`<div class="field"><label>Nama lengkap</label><input id="eName" value="${esc(s.name)}"></div><div class="field"><label>NIS/NISN</label><input id="eNisn" value="${esc(s.nisn||"")}"></div><div class="field"><label>Kelas</label><select id="eClass"><option value="">Pilih</option>${state.classes.map(c=>`<option value="${esc(c.name)}" ${c.name===s.className?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div><div class="field"><label>Jenis Kelamin</label><select id="eGender"><option ${s.gender==="L"?"selected":""}>L</option><option ${s.gender==="P"?"selected":""}>P</option></select></div><button class="btn primary full" onclick="window.updateStudent('${id}')">Simpan Perubahan</button>`)
+}
+window.updateStudent=async(id)=>{
+await setDoc(doc(db,"students",id),{name:$("eName").value.trim(),nisn:$("eNisn").value.trim(),className:$("eClass").value,gender:$("eGender").value},{merge:true});
+$("modal").classList.add("hidden");toast("Data siswa diperbarui")
+ }
+ function classes(){$("content").innerHTML=`<div class="pagehead"><h2>Data Kelas</h2><button class="btn primary" onclick="window.addClass()">+ Tambah Kelas</button></div><div class="grid">${state.classes.map(c=>`<div class="card"><h3>${esc(c.name)}</h3><div class="muted">${state.students.filter(s=>s.className===c.name).length} siswa</div><button class="btn danger" style="margin-top:10px" onclick="window.del('classes','${c.id}')">Hapus</button></div>`).join("")||`<div class="card">Belum ada kelas.</div>`}</div>`}
+window.addClass=()=>modal("Tambah Kelas",`<div class="field"><label>Nama kelas</label><input id="className" placeholder="Contoh: VIII A"></div><button class="btn primary full" onclick="window.saveClass()">Simpan</button>`);
+window.saveClass=async()=>{if(!$("className").value.trim())return;await add("classes",{name:$("className").value.trim()});$("modal").classList.add("hidden")}
+ function attendance(){
+  $("content").innerHTML=`
+    <div class="pagehead">
+      <div><h2>Absensi Siswa</h2><div class="muted">Pilih kelas dan tanggal untuk mengisi atau mengedit absensi.</div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="grid2">
+        <div class="field"><label>Kelas</label><select id="attendanceClass" onchange="window.loadAttendanceStudents()"><option value="">Pilih kelas</option>${state.classes.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("")}</select></div>
+        <div class="field"><label>Tanggal</label><input id="attendanceDate" type="date" value="${new Date().toISOString().slice(0,10)}" onchange="window.loadAttendanceStudents()"></div>
+      </div>
+    </div>
+    <div id="attendancePanel"><div class="card"><div class="muted">Pilih kelas terlebih dahulu untuk menampilkan daftar siswa.</div></div></div>`;
+ }
+
+ function existingAttendance(className,date){
+   const out={};
+   state.attendance.filter(a=>a.date===date&&a.className===className).forEach(a=>out[a.studentId]=a.status);
+   return out;
+ }
+
+ window.loadAttendanceStudents=()=>{
+   const className=$("attendanceClass")?.value||"";
+   const date=$("attendanceDate")?.value||"";
+   if(!className){$("attendancePanel").innerHTML=`<div class="card"><div class="muted">Pilih kelas terlebih dahulu.</div></div>`;return;}
+   const students=state.students.filter(s=>s.className===className).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+   if(!students.length){$("attendancePanel").innerHTML=`<div class="card"><div class="muted">Belum ada siswa di kelas ${esc(className)}.</div></div>`;return;}
+   const old=existingAttendance(className,date);
+   const alreadySaved=students.some(s=>old[s.id]);
+   $("attendancePanel").innerHTML=`
+     <div class="card">
+       <div class="att-toolbar">
+         <div><h3 style="margin:0">Daftar Absensi</h3><div class="muted">${esc(className)} • ${esc(date)}${alreadySaved?" • <b>Data tersimpan — mode edit aktif</b>":""}</div></div>
+         <div class="actions"><button class="btn success" onclick="window.hadirSemua()">✅ Hadir Semua</button><button class="btn secondary" onclick="window.clearAttendance()">↺ Kosongkan</button></div>
+       </div>
+       <div class="notice"><b>Petunjuk:</b> pilih satu status untuk setiap siswa. Data yang sudah tersimpan otomatis muncul kembali saat kelas dan tanggal yang sama dipilih, sehingga bisa langsung diedit.</div>
+       <div class="att-table-wrap"><table class="att-table"><thead><tr><th>Nama Siswa</th><th>Hadir</th><th>Izin</th><th>Sakit</th><th>Alfa</th></tr></thead><tbody id="attendanceRows">
+       ${students.map(s=>{const st=old[s.id]||"";return `<tr data-student="${esc(s.id)}"><td><b>${esc(s.name)}</b><div class="muted">${esc(s.nisn||"-")}</div></td>${["Hadir","Izin","Sakit","Alfa"].map(v=>`<td><input class="att-radio" type="radio" name="status_${esc(s.id)}" value="${v}" ${st===v?"checked":""} onchange="window.updateAttendanceSummary()"></td>`).join("")}</tr>`}).join("")}
+       </tbody></table></div>
+       <div id="attendanceSummary" class="att-summary"></div>
+       <div class="actions" style="justify-content:space-between;margin-top:16px"><button class="btn secondary" onclick="window.loadAttendanceStudents()">↻ Muat Ulang</button><button class="btn primary" onclick="window.saveAttendance()">💾 ${alreadySaved?"Simpan Perubahan":"Simpan Absensi"}</button></div>
+     </div>`;
+   window.updateAttendanceSummary();
+ };
+
+ window.hadirSemua=()=>{
+   if(!$("attendanceClass")?.value){toast("Pilih kelas terlebih dahulu");return;}
+   document.querySelectorAll("#attendanceRows input[value='Hadir']").forEach(r=>r.checked=true);
+   window.updateAttendanceSummary();toast("Semua siswa ditandai Hadir");
+ };
+ window.clearAttendance=()=>{document.querySelectorAll("#attendanceRows input[type='radio']").forEach(r=>r.checked=false);window.updateAttendanceSummary();toast("Pilihan absensi dikosongkan")};
+ window.updateAttendanceSummary=()=>{
+   const c={Hadir:0,Izin:0,Sakit:0,Alfa:0};
+   document.querySelectorAll("#attendanceRows tr[data-student]").forEach(row=>{const x=row.querySelector("input[type='radio']:checked");if(x)c[x.value]++});
+   const total=document.querySelectorAll("#attendanceRows tr[data-student]").length;
+   const belum=Math.max(0,total-c.Hadir-c.Izin-c.Sakit-c.Alfa);const el=$("attendanceSummary");if(!el)return;
+   el.innerHTML=`<div class="card kpi-h">🟢 Hadir<strong>${c.Hadir}</strong></div><div class="card kpi-i">🔵 Izin<strong>${c.Izin}</strong></div><div class="card kpi-s">🟡 Sakit<strong>${c.Sakit}</strong></div><div class="card kpi-a">🔴 Alfa<strong>${c.Alfa}</strong></div><div class="muted" style="grid-column:1/-1">Total siswa: ${total} • Belum dipilih: ${belum}</div>`;
+ };
+ window.saveAttendance=async()=>{
+   const className=$("attendanceClass")?.value||"",date=$("attendanceDate")?.value||"";
+   if(!className){toast("Pilih kelas terlebih dahulu");return} if(!date){toast("Pilih tanggal terlebih dahulu");return}
+   const students=state.students.filter(s=>s.className===className);if(!students.length){toast("Tidak ada siswa pada kelas ini");return}
+   const missing=students.filter(s=>!document.querySelector(`input[name="status_${CSS.escape(s.id)}"]:checked`));
+   if(missing.length){toast(`Masih ada ${missing.length} siswa belum dipilih`);return}
+   try{
+     for(const s of students){const selected=document.querySelector(`input[name="status_${CSS.escape(s.id)}"]:checked`);await setDoc(doc(db,"attendance",`${date}_${s.id}`),{date,studentId:s.id,studentName:s.name,className,status:selected.value,updatedAt:serverTimestamp()},{merge:true})}
+     toast(`Absensi berhasil disimpan (${students.length} siswa)`);window.loadAttendanceStudents();
+   }catch(e){console.error(e);toast("Gagal menyimpan absensi")}
+ };
+function leave(){$("content").innerHTML=`<div class="pagehead"><h2>Izin / Sakit</h2><button class="btn primary" onclick="window.addLeave()">+ Tambah</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Tanggal</th><th>Siswa</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>${state.leave.map(a=>`<tr><td>${esc(a.date)}</td><td>${esc(a.studentName)}</td><td>${esc(a.status)}</td><td>${esc(a.note||"-")}</td><td><button class="btn danger" onclick="window.del('leave','${a.id}')">Hapus</button></td></tr>`).join("")||`<tr><td colspan="5" class="muted">Belum ada data.</td></tr>`}</tbody></table></div>`}
+window.addLeave=()=>modal("Izin / Sakit",`<div class="field"><label>Tanggal</label><input id="lDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Siswa</label><select id="lStudent">${state.students.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></div><div class="field"><label>Status</label><select id="lStatus"><option>Izin</option><option>Sakit</option></select></div><div class="field"><label>Keterangan</label><textarea id="lNote"></textarea></div><button class="btn primary full" onclick="window.saveLeave()">Simpan</button>`);
+window.saveLeave=async()=>{const s=state.students.find(x=>x.id==$("lStudent").value);if(!s)return;await add("leave",{date:$("lDate").value,studentName:s.name,studentId:s.id,status:$("lStatus").value,note:$("lNote").value});$("modal").classList.add("hidden")}
+ function buildReportRows(){
+   return state.students.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(s=>{
+     const a=state.attendance.filter(x=>x.studentId===s.id);const H=a.filter(x=>x.status==="Hadir").length,I=a.filter(x=>x.status==="Izin").length,S=a.filter(x=>x.status==="Sakit").length,A=a.filter(x=>x.status==="Alpa").length,total=H+I+S+A,score=total?Math.round(H/total*100):0;return {...s,H,I,S,A,total,score}
+   });
+ }
+ function reports(){
+   const rows=buildReportRows();
+   $("content").innerHTML=`<div class="pagehead"><div><h2>Rekap & Penilaian</h2><div class="muted">Rekap otomatis berdasarkan data absensi yang tersimpan.</div></div><div class="actions"><button class="btn success" onclick="window.exportExcel()">📊 Export Excel (.xlsx)</button><button class="btn secondary" onclick="window.exportCSV()">Export CSV</button></div></div><div class="card" style="margin-bottom:14px"><b>Nilai kehadiran</b><div class="muted">Nilai = jumlah Hadir ÷ total catatan absensi × 100.</div></div><div class="tablewrap"><table class="table"><thead><tr><th>No</th><th>Nama</th><th>Kelas</th><th>Hadir</th><th>Izin</th><th>Sakit</th><th>Alfa</th><th>Total</th><th>Nilai</th></tr></thead><tbody>${rows.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.name)}</b></td><td>${esc(s.className||"-")}</td><td>${s.H}</td><td>${s.I}</td><td>${s.S}</td><td>${s.A}</td><td>${s.total}</td><td><b>${s.score}</b></td></tr>`).join("")||`<tr><td colspan="9" class="muted">Belum ada data siswa.</td></tr>`}</tbody></table></div>`;
+ }
+ function csvEscape(v){return `"${String(v??"").replace(/"/g,'""')}"`}
+ window.exportCSV=()=>{const rows=buildReportRows();let out="No,Nama,Kelas,Hadir,Izin,Sakit,Alpa,Total,Nilai\n";rows.forEach((s,i)=>out+=[i+1,s.name,s.className||"",s.H,s.I,s.S,s.A,s.total,s.score].map(csvEscape).join(",")+"\n");const b=new Blob(["\ufeff"+out],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="Rekap_Absensi_PMR.csv";a.click();URL.revokeObjectURL(u)};
+ window.exportExcel=async()=>{
+   if(!state.students.length){toast("Belum ada data siswa untuk diekspor");return}
+   try{
+     const XLSX=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");const rows=buildReportRows();
+     const summary=[["LAPORAN REKAP ABSENSI PMR"],["Nama Sekolah",state.settings.school||"PMR Digital"],["Nama Pelatih",state.settings.coach||"-"],["Tahun Pelajaran",state.settings.year||"-"],["Tanggal Ekspor",new Date().toLocaleString("id-ID")],[],["REKAP SISWA"],["No","Nama","Kelas","Hadir","Izin","Sakit","Alfa","Total Absensi","Nilai"],...rows.map((s,i)=>[i+1,s.name,s.className||"",s.H,s.I,s.S,s.A,s.total,s.score])];
+     const details=[["DETAIL ABSENSI PMR"],["Nama Sekolah",state.settings.school||"PMR Digital"],["Tahun Pelajaran",state.settings.year||"-"],[],["No","Tanggal","Nama Siswa","Kelas","Status"],...state.attendance.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.studentName||"").localeCompare(b.studentName||"")).map((a,i)=>[i+1,a.date||"",a.studentName||"",a.className||"",a.status||""])];
+     const ws1=XLSX.utils.aoa_to_sheet(summary),ws2=XLSX.utils.aoa_to_sheet(details);ws1["!cols"]=[{wch:6},{wch:30},{wch:18},{wch:12},{wch:12},{wch:12},{wch:12},{wch:18},{wch:12}];ws2["!cols"]=[{wch:6},{wch:14},{wch:30},{wch:18},{wch:14}];ws1["!freeze"]="A8";ws2["!freeze"]="A5";ws1["!autofilter"]={ref:`A8:I${8+rows.length}`};ws2["!autofilter"]={ref:`A5:E${5+state.attendance.length}`};
+     const title={font:{bold:true,sz:16,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"B91C1C"}},alignment:{horizontal:"center",vertical:"center"}},head={font:{bold:true,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"7F1D1D"}},alignment:{horizontal:"center",vertical:"center"}};
+     ws1["A1"].s=title;ws1["A7"].s=title;for(let c=0;c<9;c++)ws1[XLSX.utils.encode_cell({r:7,c})].s=head;ws2["A1"].s=title;for(let c=0;c<5;c++)ws2[XLSX.utils.encode_cell({r:4,c})].s=head;
+     const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws1,"Rekap Siswa");XLSX.utils.book_append_sheet(wb,ws2,"Detail Absensi");XLSX.writeFile(wb,"Rekap_Absensi_PMR.xlsx");toast("Excel berhasil dibuat dengan format rapi")
+   }catch(e){console.error(e);toast("Export Excel gagal. Periksa koneksi internet.")}
+ };
+function printPage(){$("content").innerHTML=`<div class="pagehead"><h2>Laporan</h2><button class="btn primary" onclick="window.print()">🖨️ Cetak / PDF</button></div><div class="card" id="printArea"><h1>${esc(state.settings.school)}</h1><h2>Laporan Absensi PMR</h2><p>Pelatih: ${esc(state.settings.coach||"-")} • Tahun Ajaran: ${esc(state.settings.year)}</p><hr><p>Total siswa: <b>${state.students.length}</b> • Catatan absensi: <b>${state.attendance.length}</b></p><p>Dicetak: ${new Date().toLocaleString("id-ID")}</p></div>`}
+function settings(){$("content").innerHTML=`<div class="pagehead"><h2>Pengaturan</h2></div><div class="card"><div class="field"><label>Nama Sekolah</label><input id="setSchool" value="${esc(state.settings.school)}"></div><div class="field"><label>Nama Pelatih</label><input id="setCoach" value="${esc(state.settings.coach)}"></div><div class="field"><label>Tahun Ajaran</label><input id="setYear" value="${esc(state.settings.year)}"></div><div class="field"><label>Logo</label><input id="setLogo" type="file" accept="image/*"><div class="muted">Logo disimpan di browser perangkat ini. Untuk logo yang sama di semua HP, gunakan file logo yang sama pada aplikasi.</div></div><button class="btn primary" onclick="window.saveSettings()">Simpan Pengaturan</button></div>`}
+window.saveSettings=()=>{state.settings.school=$("setSchool").value;state.settings.coach=$("setCoach").value;state.settings.year=$("setYear").value;const f=$("setLogo").files[0];if(f){const r=new FileReader();r.onload=()=>{state.settings.logo=r.result;saveLocal();applySettings();toast("Pengaturan tersimpan");render()};r.readAsDataURL(f)}else{saveLocal();applySettings();toast("Pengaturan tersimpan");render()}}
+window.del=remove;
+$("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-page]");if(!b)return;state.page=b.dataset.page;document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x===b));render()});
+$("logout").onclick=()=>signOut(auth);
+$("loginBtn").onclick=async()=>{if(!configReady){$("loginMsg").textContent="Konfigurasi belum lengkap: isi apiKey pada index.html sesuai Firebase Console.";return}try{await signInWithEmailAndPassword(auth,$("email").value,$("password").value)}catch(e){$("loginMsg").textContent=e.message}}
+loadLocal();
+onAuthStateChanged(auth,user=>{if(user){$("login").classList.add("hidden");$("app").classList.remove("hidden");$("userEmail").textContent=user.email||"";listen();render()}else{$("login").classList.remove("hidden");$("app").classList.add("hidden");}});
+if(!configReady)$("loginMsg").textContent="Sebelum upload, isi apiKey Firebase di bagian firebaseConfig.";
+</script>
+</body></html>
