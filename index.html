@@ -85,9 +85,281 @@ $("modal").classList.add("hidden");toast("Data siswa diperbarui")
  function classes(){$("content").innerHTML=`<div class="pagehead"><h2>Data Kelas</h2><button class="btn primary" onclick="window.addClass()">+ Tambah Kelas</button></div><div class="grid">${state.classes.map(c=>`<div class="card"><h3>${esc(c.name)}</h3><div class="muted">${state.students.filter(s=>s.className===c.name).length} siswa</div><button class="btn danger" style="margin-top:10px" onclick="window.del('classes','${c.id}')">Hapus</button></div>`).join("")||`<div class="card">Belum ada kelas.</div>`}</div>`}
 window.addClass=()=>modal("Tambah Kelas",`<div class="field"><label>Nama kelas</label><input id="className" placeholder="Contoh: VIII A"></div><button class="btn primary full" onclick="window.saveClass()">Simpan</button>`);
 window.saveClass=async()=>{if(!$("className").value.trim())return;await add("classes",{name:$("className").value.trim()});$("modal").classList.add("hidden")}
-function attendance(){$("content").innerHTML=`<div class="pagehead"><h2>Absensi</h2><button class="btn primary" onclick="window.addAttendance()">+ Isi Absensi</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Tanggal</th><th>Siswa</th><th>Kelas</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>${state.attendance.sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(a=>`<tr><td>${esc(a.date)}</td><td>${esc(a.studentName)}</td><td>${esc(a.className)}</td><td><span class="pill ${a.status?.toLowerCase()}">${esc(a.status)}</span></td><td>${esc(a.note||"-")}</td><td><button class="btn danger" onclick="window.del('attendance','${a.id}')">Hapus</button></td></tr>`).join("")||`<tr><td colspan="6" class="muted">Belum ada absensi.</td></tr>`}</tbody></table></div>`}
-window.addAttendance=()=>modal("Catat Absensi",`<div class="field"><label>Tanggal</label><input id="aDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Siswa</label><select id="aStudent">${state.students.map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.className||"-")}</option>`).join("")}</select></div><div class="field"><label>Status</label><select id="aStatus"><option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alpa</option></select></div><div class="field"><label>Keterangan</label><input id="aNote"></div><button class="btn primary full" onclick="window.saveAttendance()">Simpan</button>`);
-window.saveAttendance=async()=>{const s=state.students.find(x=>x.id==$("aStudent").value);if(!s)return;await add("attendance",{date:$("aDate").value,studentId:s.id,studentName:s.name,className:s.className||"",status:$("aStatus").value,note:$("aNote").value});$("modal").classList.add("hidden")}
+function attendance(){
+
+  const today = new Date().toISOString().slice(0,10);
+
+  $("content").innerHTML = `
+    <div class="pagehead">
+      <div>
+        <h2>Absensi</h2>
+        <div class="muted">Pilih status kehadiran setiap siswa</div>
+      </div>
+      <button class="btn primary" onclick="window.openAttendance()">
+        ➕ Isi Absensi
+      </button>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+
+      <div class="toolbar">
+
+        <div class="field" style="margin:0">
+          <label>Tanggal</label>
+          <input
+            id="attDate"
+            type="date"
+            value="${today}"
+            onchange="window.loadAttendanceForm()"
+          >
+        </div>
+
+        <div class="field" style="margin:0">
+          <label>Kelas</label>
+          <select
+            id="attClass"
+            onchange="window.loadAttendanceForm()"
+          >
+            <option value="">Semua Kelas</option>
+            ${state.classes.map(c =>
+              `<option value="${esc(c.name)}">${esc(c.name)}</option>`
+            ).join("")}
+          </select>
+        </div>
+
+      </div>
+
+      <div class="actions" style="margin-top:10px">
+
+        <button
+          class="btn secondary"
+          onclick="window.markAllPresent()"
+        >
+          ✅ Hadir Semua
+        </button>
+
+        <button
+          class="btn primary"
+          onclick="window.saveAttendanceBatch()"
+        >
+          💾 Simpan Absensi
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="tablewrap">
+
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Siswa</th>
+            <th>Kelas</th>
+            <th style="text-align:center">Hadir</th>
+            <th style="text-align:center">Izin</th>
+            <th style="text-align:center">Sakit</th>
+            <th style="text-align:center">Alfa</th>
+          </tr>
+        </thead>
+
+        <tbody id="attendanceRows"></tbody>
+
+      </table>
+
+    </div>
+  `;
+
+  window.loadAttendanceForm();
+}
+
+
+window.openAttendance = () => {
+
+  $("attDate").value = new Date().toISOString().slice(0,10);
+
+  if($("attClass")){
+    $("attClass").value = "";
+  }
+
+  window.loadAttendanceForm();
+
+};
+
+
+window.loadAttendanceForm = () => {
+
+  const date = $("attDate")?.value;
+  const className = $("attClass")?.value || "";
+
+  if(!date) return;
+
+  let students = [...state.students];
+
+  if(className){
+    students = students.filter(
+      s => s.className === className
+    );
+  }
+
+  students.sort((a,b) =>
+    (a.name || "").localeCompare(b.name || "")
+  );
+
+  const rows = $("attendanceRows");
+
+  if(!rows) return;
+
+  rows.innerHTML = students.map((s,index) => {
+
+    const old = state.attendance.find(a =>
+      a.date === date &&
+      a.studentId === s.id
+    );
+
+    const status = old?.status || "Hadir";
+
+    return `
+      <tr>
+
+        <td>${index + 1}</td>
+
+        <td>
+          <b>${esc(s.name)}</b>
+        </td>
+
+        <td>
+          ${esc(s.className || "-")}
+        </td>
+
+        <td style="text-align:center">
+          <input
+            type="radio"
+            name="status_${s.id}"
+            value="Hadir"
+            ${status === "Hadir" ? "checked" : ""}
+          >
+        </td>
+
+        <td style="text-align:center">
+          <input
+            type="radio"
+            name="status_${s.id}"
+            value="Izin"
+            ${status === "Izin" ? "checked" : ""}
+          >
+        </td>
+
+        <td style="text-align:center">
+          <input
+            type="radio"
+            name="status_${s.id}"
+            value="Sakit"
+            ${status === "Sakit" ? "checked" : ""}
+          >
+        </td>
+
+        <td style="text-align:center">
+          <input
+            type="radio"
+            name="status_${s.id}"
+            value="Alpa"
+            ${status === "Alpa" ? "checked" : ""}
+          >
+        </td>
+
+      </tr>
+    `;
+
+  }).join("") || `
+    <tr>
+      <td colspan="7" class="muted">
+        Belum ada siswa pada kelas ini.
+      </td>
+    </tr>
+  `;
+
+};
+
+
+window.markAllPresent = () => {
+
+  document
+    .querySelectorAll('input[type="radio"][value="Hadir"]')
+    .forEach(radio => {
+      radio.checked = true;
+    });
+
+  toast("Semua siswa ditandai Hadir");
+
+};
+
+
+window.saveAttendanceBatch = async () => {
+
+  const date = $("attDate")?.value;
+
+  if(!date){
+    toast("Tanggal belum dipilih");
+    return;
+  }
+
+  const className = $("attClass")?.value || "";
+
+  let students = [...state.students];
+
+  if(className){
+    students = students.filter(
+      s => s.className === className
+    );
+  }
+
+  if(!students.length){
+    toast("Tidak ada siswa");
+    return;
+  }
+
+  let saved = 0;
+
+  for(const s of students){
+
+    const selected =
+      document.querySelector(
+        `input[name="status_${s.id}"]:checked`
+      );
+
+    if(!selected) continue;
+
+    const status = selected.value;
+
+    const attendanceId =
+      `${date}_${s.id}`;
+
+    await setDoc(
+      doc(db,"attendance",attendanceId),
+      {
+        date: date,
+        studentId: s.id,
+        studentName: s.name,
+        className: s.className || "",
+        status: status,
+        note: "",
+        updatedAt: serverTimestamp()
+      },
+      {
+        merge: true
+      }
+    );
+
+    saved++;
+
+  }
+
+  toast(`${saved} data absensi berhasil disimpan`);
+
+};
 function leave(){$("content").innerHTML=`<div class="pagehead"><h2>Izin / Sakit</h2><button class="btn primary" onclick="window.addLeave()">+ Tambah</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Tanggal</th><th>Siswa</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>${state.leave.map(a=>`<tr><td>${esc(a.date)}</td><td>${esc(a.studentName)}</td><td>${esc(a.status)}</td><td>${esc(a.note||"-")}</td><td><button class="btn danger" onclick="window.del('leave','${a.id}')">Hapus</button></td></tr>`).join("")||`<tr><td colspan="5" class="muted">Belum ada data.</td></tr>`}</tbody></table></div>`}
 window.addLeave=()=>modal("Izin / Sakit",`<div class="field"><label>Tanggal</label><input id="lDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Siswa</label><select id="lStudent">${state.students.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></div><div class="field"><label>Status</label><select id="lStatus"><option>Izin</option><option>Sakit</option></select></div><div class="field"><label>Keterangan</label><textarea id="lNote"></textarea></div><button class="btn primary full" onclick="window.saveLeave()">Simpan</button>`);
 window.saveLeave=async()=>{const s=state.students.find(x=>x.id==$("lStudent").value);if(!s)return;await add("leave",{date:$("lDate").value,studentName:s.name,studentId:s.id,status:$("lStatus").value,note:$("lNote").value});$("modal").classList.add("hidden")}
